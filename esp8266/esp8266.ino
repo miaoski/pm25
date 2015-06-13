@@ -6,11 +6,11 @@
 
 #define SSID "ljm"
 #define APKEY "ftrftrftr"
-#define DST_IP "220.135.254.63"  // miaoski.idv.tw
-#define DST_PORT (2080)
+#define HOST_NAME "220.135.254.63"  // miaoski.idv.tw
+#define HOST_PORT (2080)
 
 SoftwareSerial dbgSerial(10, 11); // RX, TX
-ESP8266 wifi(Serial1);
+ESP8266 wifi(Serial);
 
 void setup() {
   Serial.begin(115200);
