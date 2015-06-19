@@ -111,6 +111,7 @@ void loop() {
   wifi.send((const uint8_t*)url, strlen(url));
   dbgSerial.println(url);
 
+  /*
   uint32_t len = wifi.recv(buffer, sizeof(buffer), 10000);
   if (len > 0) {
     dbgSerial.print("Received:[");
@@ -119,6 +120,7 @@ void loop() {
     }
     dbgSerial.print("]\r\n");
   }
+  */
 
   if (wifi.releaseTCP()) {
     dbgSerial.print("release tcp ok\r\n");
