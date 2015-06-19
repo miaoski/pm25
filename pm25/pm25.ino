@@ -18,33 +18,31 @@ void loop() {
   float dustDensity = 0;
   
   MQ9Value = readMQ9();
-
   dustVal = read_dn7c3ca006();
-  calcVoltage = dustVal * (5.0 / 1024.0);
+  // calcVoltage = dustVal * (5.0 / 1024.0);
   // Check datasheet
-  dustDensity = 0.1724 * (calcVoltage - 0.6) * 1000.0;
+  // dustDensity = 0.1724 * (calcVoltage - 0.6) * 1000.0;
 
-  Serial.print("MQ9_volt = ");
+  Serial.print("MQ9_val = ");
   Serial.print(MQ9Value);
-  Serial.println("V");
 
-  Serial.print("dn7c3ca006_volt = ");
-  Serial.print(calcVoltage);
+  Serial.print("   dn7c3ca006_val = ");
+  Serial.println(dustVal);
 
-  Serial.print("  dustVal: ");
-  Serial.print(dustVal);
+  //Serial.print("  dustVal: ");
+  //Serial.print(dustVal);
 
-  if (dustVal>36.455) {
-    Serial.print("  PM2.5: ");
+  //if (dustVal>36.455) {
+  //  Serial.print("  PM2.5: ");
     // 公式複製自 http://tw.taobao.com/item/44139051810.htm
-    Serial.print((float(dustVal/1024)-0.0356)*120000*0.035);
-    Serial.print("  Dust Density: ");
-    Serial.print(dustDensity);
-    Serial.println(" ug/m3 ");
-  } else {
-    Serial.print("   Invalid voltage: ");
-    Serial.println(dustVal);
-  }
+  //  Serial.print((float(dustVal/1024)-0.0356)*120000*0.035);
+  //  Serial.print("  Dust Density: ");
+  //  Serial.print(dustDensity);
+  //  Serial.println(" ug/m3 ");
+  //} else {
+  //  Serial.print("   Invalid voltage: ");
+  //  Serial.println(dustVal);
+  //}
   delay(1000);
 }
 
@@ -56,8 +54,9 @@ float readMQ9() {
     sensorValue += analogRead(mq9Sig);
   }
   sensorValue = sensorValue/100.0;
-  sensor_volt = sensorValue/1024*5.0;
-  return sensor_volt;
+  return sensorValue;
+  //sensor_volt = sensorValue/1024*5.0;
+  //return sensor_volt;
 }
 
 float read_dn7c3ca006() {
