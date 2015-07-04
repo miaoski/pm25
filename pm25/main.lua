@@ -1,1 +1,2 @@
-print "main.lua, please update me."
+print "main.lua"
+

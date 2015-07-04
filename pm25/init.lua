@@ -1,11 +1,8 @@
 print "g0v PM2.5 Project"
-print "Pull GPIO2 low to reset password"
 
-pin = 4		-- GPIO2
-gpio.mode(pin, gpio.INPUT, gpio.PULLUP)
-max_retry = 20
+max_retry = 60
 
-if(gpio.read(pin) == 1 and file.open("config.lua")) then
+if(file.open("config.lua")) then
 	file.flush()
 	file.close()
 	require("config")
@@ -35,10 +32,6 @@ if(gpio.read(pin) == 1 and file.open("config.lua")) then
   		end
 	end)
 else
-	if(gpio.read(pin) == 0) then
-		print("GPIO2 pulled low.  Enter AP mode.")
-	else
-		print("config.lua not found.  Enter AP mode.")
-	end
+	print("config.lua not found.  Enter AP mode.")
 	dofile("ap.lua")
 end
