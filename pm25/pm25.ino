@@ -9,7 +9,7 @@
 #define SHARPPIN A0     // Pin 2 VO of dust sensor to Arduino A0
 #define MQ9PIN   A1     // MQ9 SIG to Arduino A1
 #define LEDPOWER 2      // Pin 4 LED VCC of dest sensor to Arduino D2
-#define NODEMCU_RESET 4	// To NodeMCU reset pin
+#define NODEMCU_RESET 9	// To NodeMCU reset pin
 
 #define samplingTime 280
 #define deltaTime    40
@@ -21,7 +21,7 @@ SoftwareSerial esp8266(10, 11); // RX, TX
 
 void setup() {
   pinMode(LEDPOWER, OUTPUT);
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(250);
   Serial.println("g0v PM2.5 Project");
   
@@ -62,14 +62,17 @@ void loop() {
 
   esp8266.print("hum = ");
   esp8266.println(h);
+  delay(150);
   esp8266.print("tmp = ");
   esp8266.println(t);
+  delay(150);
   esp8266.print("mq9 = ");
   esp8266.println(MQ9Value);
+  delay(150);
   esp8266.print("pm25 = ");
   esp8266.println(dustVal);
 
-  delay(2500);
+  delay(2000);
 }
 
 float readMQ9() {
