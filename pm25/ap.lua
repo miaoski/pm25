@@ -9,7 +9,6 @@ print(wifi.ap.getip())
 srv = net.createServer(net.TCP)
 srv:listen(80, function(conn)
 	conn:on("receive", function(conn, payload)
-		setstate = "waiting"
 		k = string.find(payload, "ssid")
 		if k then
 			str = string.sub(payload, k)
@@ -25,8 +24,6 @@ srv:listen(80, function(conn)
 			file.writeline(strssid)
 			file.writeline(strpass)
 			file.close()
-
-			setstate = "configuration saved."
 			print("store ok")
 		end
 
@@ -34,7 +31,6 @@ srv:listen(80, function(conn)
 		conn:send("<html><head></head><body>")
 		conn:send("<p>ESP8266-".. node.chipid().." - NODE.HEAP: ".. node.heap().."</p>\n")
 
-		conn:send('<p style="color:red">Status: '..setstate.."</p>")
 		conn:send("<FORM action = \"\" method = \"POST\">")
 		conn:send("SSID: <input type = \"test\" name = \"ssid\">")
 		conn:send("<br>")
