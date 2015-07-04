@@ -1,8 +1,8 @@
 print "g0v PM2.5 Project"
 print "Pull GPIO2 low to reset password"
 
-pin = gpio[2]
-gpio.mode(pin, gpio.INPUT)
+pin = 4		-- GPIO2
+gpio.mode(pin, gpio.INPUT, gpio.PULLUP)
 max_retry = 20
 
 if(gpio.read(pin) == 1 and file.open("config.lua")) then
@@ -27,11 +27,12 @@ if(gpio.read(pin) == 1 and file.open("config.lua")) then
 			if cnt < max_retry then
 				print("Getting an IP...")
 			else
+				tmr.stop(0)
 				print("Unable to get IP.  Enter AP mode.")
-				tmr.stop(1)
 				dofile("ap.lua")
 			end
   		end
+		cnt = cnt + 1
 	end)
 else
 	if(gpio.read(pin) == 0) then
