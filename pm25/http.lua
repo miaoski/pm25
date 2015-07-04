@@ -19,7 +19,9 @@ function M.get(host, port, url, args, callback)
 	end)
 	conn:on("disconnection", function(conn) 
 		conn = nil
-		inputbuffer = string.sub(inputbuffer,string.find(inputbuffer,"\r\n\r\n") + 4)
+		if(string.find(inputbuffer, "\r\n\r\n")) then
+			inputbuffer = string.sub(inputbuffer,string.find(inputbuffer,"\r\n\r\n") + 4)
+		end
 		callback(inputbuffer)
 	end)
 	conn:connect(port,host)
