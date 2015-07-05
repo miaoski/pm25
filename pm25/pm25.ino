@@ -5,11 +5,12 @@
 #include <SoftwareSerial.h>
 
 #define DHTTYPE DHT22
-#define DHTPIN 3        // DHT pin
+#define DHTPIN 3        // DHT pin to D3
 #define SHARPPIN A0     // Pin 2 VO of dust sensor to Arduino A0
 #define MQ9PIN   A1     // MQ9 SIG to Arduino A1
 #define LEDPOWER 2      // Pin 4 LED VCC of dest sensor to Arduino D2
-#define NODEMCU_RESET 9	// To NodeMCU reset pin
+#define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
+#define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
 
 #define samplingTime 280
 #define deltaTime    40
