@@ -5,21 +5,21 @@ import uuid
 import re
 
 app = Flask(__name__)
-DATABASE = './pm25.sq3'
+DATABASE = '/home/ljm/www/pm25.sq3'
 
 re_uuid = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-    return db
+def connect_db():
+    return sqlite3.connect(DATABASE)
 
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+@app.before_request
+def before_request():
+    g.db = connect_db()
+
+@app.teardown_request
+def teardown_request(exception):
+    if hasattr(g, 'db'):
+        g.db.close()
 
 @app.route('/id/<uuid>/hum/<hum>/tmp/<tmp>/mq9/<mq9>/dn7/<dn7>')
 def submit_value(uuid, hum, tmp, mq9, dn7):
@@ -31,9 +31,13 @@ def submit_value(uuid, hum, tmp, mq9, dn7):
         dn7 = float(dn7)
         assert(re_uuid.match(uuid) is not None)
     except:
+        raise
         return 'OK', 200
-	cur = get_db().cursor()
-	cur.execute('insert into log values (?, datetime("now"), ?, ?, ?, ?)', (uuid, hum, tmp, mq9, dn7))
+    conn = g.db
+    c = conn.cursor()
+    c.execute('insert into log values (?, datetime("now"), ?, ?, ?, ?)', (uuid, hum, tmp, mq9, dn7))
+    conn.commit()
+    c.close()
     return 'OK', 200
 
 
