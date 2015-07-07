@@ -11,6 +11,7 @@
 #define LEDPOWER 2      // Pin 4 LED VCC of dest sensor to Arduino D2
 #define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
 #define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
+#define SSID_RESET 5	// Pull low to reset SSID / PassKey
 
 #define samplingTime 280
 #define deltaTime    40
@@ -23,8 +24,23 @@ SoftwareSerial esp8266(10, 11); // RX, TX
 void setup() {
   pinMode(LEDPOWER, OUTPUT);
   Serial.begin(9600);
-  delay(250);
+  delay(100);
+  esp8266.begin(9600);
+  delay(100);
   Serial.println("g0v PM2.5 Project");
+
+  pinMode(SSID_RESET, INPUT_PULLUP);
+  if(digitalRead(SSID_RESET) == 0) {
+    Serial.println("Reset SSID/PassKey");
+    esp8266.println("tmr.stop(0)");
+    delay(100);
+    esp8266.println("file.remove('config.lua')");
+    delay(100);
+    esp8266.println("node.restart()");
+    Serial.println("Please set SSID/PassKey before resetting the device.");
+    while(1)
+      delay(1000);
+  }
   
   // Reset NodeMCU
   pinMode(NODEMCU_RESET, OUTPUT);
@@ -33,7 +49,6 @@ void setup() {
   digitalWrite(NODEMCU_RESET, HIGH);
 
   delay(500);
-  esp8266.begin(9600);
   dht.begin();
 }
   
