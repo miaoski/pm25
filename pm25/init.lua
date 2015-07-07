@@ -7,8 +7,9 @@ if(file.open("config.lua")) then
 	file.close()
 	require("config")
 
-	print("SSID = " .. SSID)
-	print("PASS = " .. PASS)
+	if SSID then print("SSID = " .. SSID) end
+	if PASS then print("PASS = " .. PASS) end
+	if UUID then print("UUID = " .. UUID) end
 	wifi.setmode(wifi.STATION)
 	wifi.sta.config(SSID, PASS)
 	wifi.sta.connect()
@@ -26,8 +27,8 @@ if(file.open("config.lua")) then
 				print("Getting IP ... #" .. cnt)
 			else
 				tmr.stop(0)
-				print("Unable to get IP.  Enter AP mode.")
-				dofile("ap.lua")
+				print("Unable to get IP.  Reboot.")
+				node.restart()
 			end
   		end
 	end)
