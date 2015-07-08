@@ -17,6 +17,8 @@
 #define deltaTime    40
 #define sleepTime    9680
 
+#undef  ESP8266_DBGMSG
+
 // Initialize DHT sensor for normal 16mhz Arduino
 DHT dht(DHTPIN, DHTTYPE);
 SoftwareSerial esp8266(10, 11); // RX, TX
@@ -53,10 +55,16 @@ void setup() {
 }
   
 void loop() {
+  int i;
   float h = dht.readHumidity();
   float t = dht.readTemperature();
   float MQ9Value = readMQ9();
-  float dustVal = read_dn7c3ca006();
+  float dustVal = 0;
+
+  for(i = 0; i < 250; i++) {
+    dustVal = dustVal + read_dn7c3ca006();
+  }
+  dustVal = dustVal / i;
 
   // float calcVoltage = 0;
   // float dustDensity = 0;
@@ -75,7 +83,7 @@ void loop() {
   Serial.print("   ");
   Serial.print("dn7c3ca006_val = ");
   Serial.println(dustVal);
-
+  
   esp8266.print("hum = ");
   esp8266.println(h);
   delay(150);
@@ -88,24 +96,31 @@ void loop() {
   esp8266.print("pm25 = ");
   esp8266.println(dustVal);
 
-  delay(2000);
+#ifdef ESP8266_DBGMSG
+  while(esp8266.available()) {
+    Serial.write(esp8266.read());
+  }
+#endif
+
+  delay(500);
 }
 
 float readMQ9() {
+  int x;
   float sensor_volt; 
   float sensorValue;
   sensorValue = 0;
-  for(int x = 0 ; x < 100 ; x++) {
+  for(x = 0 ; x < 100 ; x++) {
     sensorValue += analogRead(MQ9PIN);
   }
-  sensorValue = sensorValue/100.0;
+  sensorValue = sensorValue/x;
   return sensorValue;
   //sensor_volt = sensorValue/1024*5.0;
   //return sensor_volt;
 }
 
 float read_dn7c3ca006() {
-  float dust;
+  float dust = 0;
   digitalWrite(LEDPOWER, LOW);  // power on the LED
   delayMicroseconds(samplingTime);
   dust = analogRead(SHARPPIN);  // read the dust value
