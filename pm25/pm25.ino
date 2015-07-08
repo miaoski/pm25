@@ -22,6 +22,7 @@
 // Initialize DHT sensor for normal 16mhz Arduino
 DHT dht(DHTPIN, DHTTYPE);
 SoftwareSerial esp8266(10, 11); // RX, TX
+float vs;                       // Reference voltage of DN7C3CA006
 
 void setup() {
   pinMode(LEDPOWER, OUTPUT);
@@ -43,6 +44,9 @@ void setup() {
     while(1)
       delay(1000);
   }
+
+  // TODO: Calibrate Vs of DN7C3CA006
+  vs = 200.0;
   
   // Reset NodeMCU
   pinMode(NODEMCU_RESET, OUTPUT);
@@ -59,30 +63,38 @@ void loop() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
   float MQ9Value = readMQ9();
+  float v0 = 0;
+  float dn7c_h = 0;
   float dustVal = 0;
 
   for(i = 0; i < 250; i++) {
-    dustVal = dustVal + read_dn7c3ca006();
+    v0 = v0 + read_dn7c3ca006();
   }
-  dustVal = dustVal / i;
+  v0 = v0 / i;
 
-  // float calcVoltage = 0;
-  // float dustDensity = 0;
-  // calcVoltage = dustVal * (5.0 / 1024.0);
-  // Check datasheet
-  // dustDensity = 0.1724 * (calcVoltage - 0.6) * 1000.0;
-
+  if(h < 50) {
+    dn7c_h = 1;
+  } else {
+    dn7c_h = 1 - 0.01467 * (h - 50);
+  }
+  if(v0 > vs) {
+    dustVal = 0.6 * dn7c_h * (v0 - vs) * 5.0 * 1000.0 / 1024.0;
+  } else {
+    dustVal = 0;
+  }
+  
   Serial.print("hum = "); 
   Serial.print(h);
   Serial.print("%   ");
-  Serial.print("Temp: "); 
+  Serial.print("temp: "); 
   Serial.print(t);
   Serial.print("C   ");
   Serial.print("MQ9_val: ");
   Serial.print(MQ9Value);
   Serial.print("   ");
-  Serial.print("dn7c3ca006_val = ");
-  Serial.println(dustVal);
+  Serial.print("dust_val = ");
+  Serial.print(dustVal);
+  Serial.println(" mg/m3");
   
   esp8266.print("hum = ");
   esp8266.println(h);
@@ -102,7 +114,7 @@ void loop() {
   }
 #endif
 
-  delay(500);
+  delay(2000);
 }
 
 float readMQ9() {
