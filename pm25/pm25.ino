@@ -3,6 +3,7 @@
 //
 #include "DHT.h"
 #include <SoftwareSerial.h>
+#include <LiquidCrystal.h>
 
 #define DHTTYPE DHT22
 #define DHTPIN 3        // DHT pin to D3
@@ -11,7 +12,7 @@
 #define LEDPOWER 2      // Pin 4 LED VCC of dest sensor to Arduino D2
 #define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
 #define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
-#define SSID_RESET 5	// Pull low to reset SSID / PassKey
+#define SSID_RESET 13	// Pull low to reset SSID / PassKey
 
 #define samplingTime 280
 #define deltaTime    40
@@ -23,26 +24,34 @@
 DHT dht(DHTPIN, DHTTYPE);
 SoftwareSerial esp8266(10, 11); // RX, TX
 float vs;                       // Reference voltage of DN7C3CA006
+LiquidCrystal lcd(9, 8, 7, 6, 5, 4);  // RS, E, D4, D5, D6, D7
 
 void setup() {
+  lcd.begin(16, 2);
   pinMode(LEDPOWER, OUTPUT);
   Serial.begin(9600);
   delay(100);
   esp8266.begin(9600);
   delay(100);
-  Serial.println("g0v PM2.5 Project");
+  Serial.println(F("g0v PM2.5 Project"));
+  lcd.print("g0v PM2.5 Project");
 
   pinMode(SSID_RESET, INPUT_PULLUP);
   if(digitalRead(SSID_RESET) == 0) {
-    Serial.println("Reset SSID/PassKey");
-    esp8266.println("tmr.stop(0)");
+    Serial.println(F("Reset SSID/PassKey"));
+    esp8266.println(F("tmr.stop(0)"));
     delay(100);
-    esp8266.println("file.remove('config.lua')");
+    esp8266.println(F("file.remove('config.lua')"));
     delay(100);
-    esp8266.println("node.restart()");
-    Serial.println("Please set SSID/PassKey before resetting the device.");
-    while(1)
-      delay(1000);
+    esp8266.println(F("node.restart()"));
+    Serial.println(F("Please set SSID/PassKey before resetting the device."));
+    lcd.clear();
+    lcd.print(F("Set SSID/Passkey and reset device"));
+    while(1) {
+      while(esp8266.available()) {
+        Serial.write(esp8266.read());
+      }
+    }
   }
 
   // TODO: Calibrate Vs of DN7C3CA006
@@ -83,29 +92,36 @@ void loop() {
     dustVal = 0;
   }
   
-  Serial.print("hum = "); 
+  Serial.print(F("hum = ")); 
   Serial.print(h);
-  Serial.print("%   ");
-  Serial.print("temp: "); 
+  Serial.print(F("%   "));
+  Serial.print(F("temp: ")); 
   Serial.print(t);
-  Serial.print("C   ");
-  Serial.print("MQ9_val: ");
+  Serial.print(F("C   "));
+  Serial.print(F("MQ9_val: "));
   Serial.print(MQ9Value);
-  Serial.print("   ");
-  Serial.print("dust_val = ");
+  Serial.print(F("   "));
+  Serial.print(F("dust_val = "));
   Serial.print(dustVal);
-  Serial.println(" mg/m3");
+  Serial.println(F(" mg/m3"));
+
+  lcd.clear();
+  lcd.print(h); lcd.print("%RH ");
+  lcd.print(t); lcd.print("C");
+  lcd.setCursor(0, 1);
+  lcd.print(MQ9Value); lcd.print("  ");
+  lcd.print(dustVal); lcd.print("mg/m3");
   
-  esp8266.print("hum = ");
+  esp8266.print(F("hum = "));
   esp8266.println(h);
   delay(150);
-  esp8266.print("tmp = ");
+  esp8266.print(F("tmp = "));
   esp8266.println(t);
   delay(150);
-  esp8266.print("mq9 = ");
+  esp8266.print(F("mq9 = "));
   esp8266.println(MQ9Value);
   delay(150);
-  esp8266.print("pm25 = ");
+  esp8266.print(F("pm25 = "));
   esp8266.println(dustVal);
 
 #ifdef ESP8266_DBGMSG
@@ -127,8 +143,6 @@ float readMQ9() {
   }
   sensorValue = sensorValue/x;
   return sensorValue;
-  //sensor_volt = sensorValue/1024*5.0;
-  //return sensor_volt;
 }
 
 float read_dn7c3ca006() {
