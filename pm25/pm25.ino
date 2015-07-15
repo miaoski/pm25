@@ -55,7 +55,7 @@ void setup() {
   }
 
   // TODO: Calibrate Vs of DN7C3CA006
-  vs = 200.0;
+  vs = 215.0;
   
   // Reset NodeMCU
   pinMode(NODEMCU_RESET, OUTPUT);
@@ -72,10 +72,11 @@ void loop() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
   float MQ9Value = readMQ9();
-  float v0 = 0;
-  float dn7c_h = 0;
-  float dustVal = 0;
+  float v0;
+  float dn7c_h;
+  float dustVal;
 
+  v0 = 0;
   for(i = 0; i < 250; i++) {
     v0 = v0 + read_dn7c3ca006();
   }
@@ -130,7 +131,7 @@ void loop() {
   }
 #endif
 
-  delay(2000);
+  delay(1000);
 }
 
 float readMQ9() {
