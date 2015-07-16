@@ -13,6 +13,7 @@
 #define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
 #define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
 #define SSID_RESET 13	// Pull low to reset SSID / PassKey
+#define MQ9_PREHEAT  90 // 90+10 seconds
 
 #define samplingTime 280
 #define deltaTime    40
@@ -75,6 +76,11 @@ void loop() {
   float v0;
   float dn7c_h;
   float dustVal;
+
+  // Value is meaningless before the sensor is hot
+  if(millis() / 1000 < MQ9_PREHEAT) {
+    MQ9Value = 0;
+  }
 
   v0 = 0;
   for(i = 0; i < 250; i++) {
