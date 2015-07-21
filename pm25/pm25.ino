@@ -12,7 +12,7 @@
 #define LEDPOWER 2      // Pin 4 LED VCC of dest sensor to Arduino D2
 #define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
 #define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
-#define SSID_RESET 13	// Pull low to reset SSID / PassKey
+#define SSID_RESET 12	// Pull low to reset SSID / PassKey
 #define MQ9_PREHEAT  90 // 90+10 seconds
 
 #define samplingTime 280
@@ -56,13 +56,15 @@ void setup() {
   }
 
   // TODO: Calibrate Vs of DN7C3CA006
-  vs = 215.0;
+  vs = 200.0;
   
   // Reset NodeMCU
+  /*
   pinMode(NODEMCU_RESET, OUTPUT);
   digitalWrite(NODEMCU_RESET, LOW);
   delay(100);
   digitalWrite(NODEMCU_RESET, HIGH);
+  */
 
   delay(500);
   dht.begin();
