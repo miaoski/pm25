@@ -5,11 +5,11 @@
 #include <SoftwareSerial.h>
 #include <LiquidCrystal.h>
 
-#define DHTTYPE DHT22
-#define DHTPIN 3        // DHT pin to D3
+#define DHTTYPE DHT11
+#define DHTPIN 2        // DHT pin to D3
 #define SHARPPIN A0     // Pin 2 VO of dust sensor to Arduino A0
 #define MQ9PIN   A1     // MQ9 SIG to Arduino A1
-#define LEDPOWER 2      // Pin 4 LED VCC of dest sensor to Arduino D2
+#define LEDPOWER 3      // Pin 4 LED VCC of dest sensor to Arduino D2
 #define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
 #define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
 #define SSID_RESET 12	// Pull low to reset SSID / PassKey
@@ -25,7 +25,7 @@
 DHT dht(DHTPIN, DHTTYPE);
 SoftwareSerial esp8266(10, 11); // RX, TX
 float vs;                       // Reference voltage of DN7C3CA006
-LiquidCrystal lcd(9, 8, 7, 6, 5, 4);  // RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(4, 5, 6, 7, 8, 9);  // RS, E, D4, D5, D6, D7
 
 void setup() {
   lcd.begin(16, 2);
@@ -56,7 +56,7 @@ void setup() {
   }
 
   // TODO: Calibrate Vs of DN7C3CA006
-  vs = 200.0;
+  vs = 240.0;
   
   // Reset NodeMCU
   /*
@@ -89,6 +89,8 @@ void loop() {
     v0 = v0 + read_dn7c3ca006();
   }
   v0 = v0 / i;
+  // Serial.print("v0 = ");
+  // Serial.println(v0);
 
   if(h < 50) {
     dn7c_h = 1;
