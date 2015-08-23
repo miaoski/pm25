@@ -26,7 +26,7 @@ def now():
 
 def timeshift(x):
     import datetime
-    dt=datetime.datetime.now() - datetime.timedelta(0,x)
+    dt=datetime.datetime.utcnow() - datetime.timedelta(0,x)
     #return dt
     return dt.strftime('%Y-%m-%d %H:%M:00')
 
@@ -48,6 +48,7 @@ def get_agg_data():
     c = conn.cursor()
     data={}
     s = 'SELECT id, strftime("%Y-%m-%dT%H:%M:00",timestamp), humidity, temperature, dn7val FROM log WHERE timestamp>"'+timeshift(SUBMIT_INTERVAL)+'" AND timestamp<"'+timeshift(0)+'"'
+    print s
     try: row = c.execute(s)
     except sqlite3.Error as e: 
         print e
@@ -62,7 +63,7 @@ def get_agg_data():
         data[k][-1]+=1
     r=[]
     for k in data:
-        for i in xrange(0,len(data[k])): r.append(k.split(':', 1)+[v/data[k][-1] for v in data[k][:-1]])
+        r.append(k.split(':', 1)+[v/data[k][-1] for v in data[k][:-1]])
     return r
 
 def to_sheethub(x):
