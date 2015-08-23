@@ -80,9 +80,10 @@ def task_sheethub():
     submit_thread=Timer(SUBMIT_INTERVAL, task_sheethub)
     submit_thread.daemon=True
     submit_thread.start()
-    print now(),row
+    data=[]
     if row: 
         data=[r+UUID_GEO[r[0]] for r in row if r[0] in UUID_GEO]
+    print now(),data
     #if len(data)>0: to_sheethub(data)
 
 @app.route('/pm25.sq3')
