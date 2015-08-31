@@ -47,9 +47,10 @@ def get_agg_data():
     conn = connect_db()
     c = conn.cursor()
     data={}
-    s = 'SELECT id, strftime("%Y-%m-%dT%H:%M:00",timestamp), humidity, temperature, dn7val FROM log WHERE timestamp>"'+timeshift(SUBMIT_INTERVAL)+'" AND timestamp<"'+timeshift(0)+'"'
+    s = 'SELECT id, strftime("%Y-%m-%dT%H:%M:00",timestamp), humidity, temperature, dn7val FROM log WHERE timestamp>="'+timeshift(SUBMIT_INTERVAL)+'" AND timestamp<"'+timeshift(0)+'"'
     print s
-    try: row = c.execute(s)
+    try: 
+        row = c.execute(s)
     except sqlite3.Error as e: 
         print e
         print 'sql:', s
