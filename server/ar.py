@@ -83,8 +83,9 @@ def task_sheethub():
     data=[]
     if row: 
         data=[r+UUID_GEO[r[0]] for r in row if r[0] in UUID_GEO]
-    print now(),data
-    #if len(data)>0: to_sheethub(data)
+    print now(), data
+    if len(data) > 0:
+        to_sheethub(data)
 
 @app.route('/pm25.sq3')
 def send_pm25_sq3():
@@ -108,11 +109,6 @@ def submit_value(uuid, hum, tmp, mq9, dn7):
     c.execute('insert into log values (?, datetime("now"), ?, ?, ?, ?)', (uuid, hum, tmp, mq9, dn7))
     conn.commit()
     c.close()
-    #geoxy = UUID_GEO.get(uuid, [-1, -1])
-    #if geoxy[0] != -1:
-    #    x = [[uuid, now(), hum, tmp, dn7, geoxy[0], geoxy[1]]]
-    #    print x
-    #    to_sheethub(x)
     return 'OK', 200
 
 
@@ -125,8 +121,5 @@ def register():
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False     # JSON in UTF-8
     app.config['DEBUG'] = False
-    #submit_thread=Timer(SUBMIT_INTERVAL, task_sheethub).start()
     task_sheethub()
-    #print get_agg_data()
-    #print timeshift(60)
     app.run(host = '0.0.0.0', threaded=True, port=2080)
