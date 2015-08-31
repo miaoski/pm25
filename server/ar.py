@@ -52,7 +52,7 @@ def get_agg_data():
     try: row = c.execute(s)
     except sqlite3.Error as e: 
         print e
-	print 'sql:', s
+        print 'sql:', s
         return False
     for r in row:
         #print r[0:2], r[2:]
