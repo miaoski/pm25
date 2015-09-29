@@ -4,34 +4,54 @@
 #include "DHT.h"
 #include <SoftwareSerial.h>
 
-#define DHTTYPE DHT22
-#define DHTPIN 2        // DHT pin
-#define SHARPPIN A0     // Pin 2 VO of dust sensor
-#define MQ9PIN   A1     // MQ9 SIG to Arduino
-#define LEDPOWER 3      // Pin 4 LED VCC of dest sensor
-#define NODEMCU_RESET 9	// To NodeMCU reset pin to
-#define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin
-#define SSID_RESET 12	// Pull low to reset SSID / PassKey
-#define MQ9_PREHEAT  90 // 90+10 seconds
-
-// 280, 40, 9680
-#define samplingTime 460
-#define deltaTime    40
-#define sleepTime    9500
-
+// define and undef connected devices
+// DHT is mandatory.
+#undef  MQ9
+#undef  DN7C3CA006
+#define G3
 #undef  ESP8266_DBGMSG
+#undef  G3_DEBUG
+
+// define pins
+// DHT
+#define DHTTYPE DHT22
+#define DHTPIN        2    // DHT pin
+
+// MQ9
+#define MQ9PIN        A1   // MQ9 SIG to Arduino
+#define MQ9_PREHEAT   90   // 90+10 seconds
+
+// DN7C3CA006
+#define SHARPPIN      A0   // Pin 2 VO of dust sensor
+#define LEDPOWER      3    // Pin 4 LED VCC of dest sensor
+#define samplingTime  460  // factory: 280, 40, 9680
+#define deltaTime     40
+#define sleepTime     9500
+
+// ESP8266
+#define NODEMCU_RESET 13   // Power-on reset NodeMCU
+#define SSID_RESET    12   // Pull low to reset SSID / PassKey
+SoftwareSerial esp8266(10, 11); // RX, TX
+
+// G3
+SoftwareSerial g3(8, 9); // RX, TX
+
 
 // Initialize DHT sensor for normal 16mhz Arduino
 DHT dht(DHTPIN, DHTTYPE);
-SoftwareSerial esp8266(10, 11); // RX, TX
-SoftwareSerial g3(8, 9); // RX, TX
+#ifdef DN7C3CA006
 float vs;                       // Reference voltage of DN7C3CA006
+#endif
 
 void setup() {
-  pinMode(LEDPOWER, OUTPUT);
   Serial.begin(9600);
   esp8266.begin(9600);
+#ifdef DN7C3CA006
+  pinMode(LEDPOWER, OUTPUT);
+#endif
+#ifdef G3
   g3.begin(9600);
+#endif
   delay(100);
   Serial.println(F("g0v PM2.5 Project"));
 
@@ -58,7 +78,9 @@ void setup() {
   }
 
   // TODO: Calibrate Vs of DN7C3CA006
+  #ifdef DN7C3CA006
   vs = 110.0;
+  #endif
   
   // Reset NodeMCU
   /*
@@ -73,48 +95,30 @@ void setup() {
 }
   
 void loop() {
-  int i;
   float h = dht.readHumidity();
   float t = dht.readTemperature();
-  float v0;
-  float dn7c_h;
-  float dustVal;
-  int g3;
-
-  v0 = 0;
-  for(i = 0; i < 50; i++) {
-    v0 = v0 + read_dn7c3ca006();
-  }
-  v0 = v0 / i;
-  Serial.print(F("v0 = "));
-  Serial.print(v0);
-  Serial.print(F("   "));
-
-  if(h < 50) {
-    dn7c_h = 1;
-  } else {
-    dn7c_h = 1 - 0.01467 * (h - 50);
-  }
-  if(v0 > vs) {
-    dustVal = 0.6 * dn7c_h * (v0 - vs) * 5.0 * 1000.0 / 1024.0;
-  } else {
-    dustVal = 0;
-  }
-
-  g3 = readG3();
- 
+  float dustVal = 0;
+  int g3 = 0;
+  
   Serial.print(F("hum = ")); 
   Serial.print(h);
   Serial.print(F("%   "));
   Serial.print(F("temp: ")); 
   Serial.print(t);
   Serial.print(F("C   "));
+#ifdef DN7C3CA006
+  dustVal = readDN7C3CA006(h);
   Serial.print(F("dust_val = "));
   Serial.print(dustVal);
   Serial.print(F(" mg/m3   "));
+#endif
+#ifdef G3
+  g3 = readG3();
   Serial.print(F("G3 = "));
   Serial.print(g3);
-  Serial.println(F(" mg/m3"));
+  Serial.print(F(" mg/m3"));
+#endif
+  Serial.println("");
   
   esp8266.print(F("hum = "));
   esp8266.println(h);
@@ -137,16 +141,33 @@ void loop() {
   delay(2000);
 }
 
-float readMQ9() {
-  int x;
-  float sensor_volt; 
-  float sensorValue;
-  sensorValue = 0;
-  for(x = 0 ; x < 100 ; x++) {
-    sensorValue += analogRead(MQ9PIN);
+#ifdef DN7C3CA006
+float readDN7C3CA006(float humidity) {
+  unsigned short i;
+  float v0;
+  float dn7c_h;
+  float dustVal;
+
+  v0 = 0;
+  for(i = 0; i < 50; i++) {
+    v0 = v0 + read_dn7c3ca006();
   }
-  sensorValue = sensorValue/x;
-  return sensorValue;
+  v0 = v0 / i;
+  Serial.print(F("v0 = "));
+  Serial.print(v0);
+  Serial.print(F("   "));
+
+  if(humidity < 50) {
+    dn7c_h = 1;
+  } else {
+    dn7c_h = 1 - 0.01467 * (humidity - 50);
+  }
+  if(v0 > vs) {
+    dustVal = 0.6 * dn7c_h * (v0 - vs) * 5.0 * 1000.0 / 1024.0;
+  } else {
+    dustVal = 0;
+  }
+  return dustVal;
 }
 
 float read_dn7c3ca006() {
@@ -159,40 +180,60 @@ float read_dn7c3ca006() {
   delayMicroseconds(sleepTime);
   return dust;
 }
+#endif
 
-int readG3() {
+#ifdef MQ9
+float readMQ9() {
   int x;
-  unsigned char buf[48];
-  unsigned char *p;
-  if(g3.available()) {
-    g3.readBytes((char *)buf, 48);
-    for(x = 0; x < 48 && buf[x] != 'B'; x++);
-    for(; x < 48 && buf[x] != 'M'; x++);
-    /*
-    for(int i = x-1; i < x+23; i++) {
+  float sensor_volt; 
+  float sensorValue;
+  sensorValue = 0;
+  for(x = 0 ; x < 100 ; x++) {
+    sensorValue += analogRead(MQ9PIN);
+  }
+  sensorValue = sensorValue/x;
+  return sensorValue;
+}
+#endif
+
+#ifdef G3
+int readG3() {
+  unsigned short x;
+  byte data;
+  byte buf[24];
+  boolean start = false;
+  for(x = 0; x < 24;) {
+    if(g3.available()) {
+      data = g3.read();
+      if(!start && data != 0x42) {
+        continue;
+      }
+      start = true;
+      buf[x++] = data;
+    }
+  }
+#ifdef G3_DEBUG
+    for(int i = 0; i < 24; i++) {
       Serial.print("i = ");
       Serial.print(i);
       Serial.print(" => ");
       Serial.println((unsigned int)buf[i]);
     }
-    */
-    p = buf + x - 1;
-    if(G3CheckSum(p)) {
-//    cf1 = ((unsigned int)p[6] << 8) + (unsigned int)p[7];
-      x = ((unsigned int)p[12] << 8) + (unsigned int)p[13];
-    } else {
-      /*
-      Serial.println(F("G3: invalid checksum"));
-      */
-      return -1;
-    }
+#endif
+  if(G3CheckSum(buf)) {
+//    cf1 = ((unsigned int)buf[6] << 8) + (unsigned int)buf[7];
+      x = ((unsigned int)buf[12] << 8) + (unsigned int)buf[13];
+      return x;
   } else {
+#ifdef G3_DEBUG
+      Serial.println(F("G3: invalid checksum"));
+#endif
     return -1;
   }
 }
 
-short G3CheckSum(unsigned char *p) {
-  int i;
+boolean G3CheckSum(byte *p) {
+  unsigned short i;
   unsigned int calcsum = 0; // BM
   unsigned int exptsum;
   for(i = 0; i < 22; i++) {
@@ -200,15 +241,15 @@ short G3CheckSum(unsigned char *p) {
   }
   exptsum = ((unsigned int)p[22] << 8) + (unsigned int)p[23];
   if(calcsum == exptsum) {
-    return 1;
+    return true;
   } else {
-    /*
+#ifdef G3_DEBUG
     Serial.print(F("G3: Expected = "));
     Serial.print(exptsum);
     Serial.print(F("  calculated = "));
     Serial.println(calcsum);
-    */
-    return 0;
+#endif
+    return false;
   }
 }
-
+#endif
