@@ -202,6 +202,7 @@ int readG3() {
   byte data;
   byte buf[24];
   boolean start = false;
+  memset(buf, 0, 24);
   for(x = 0; x < 24;) {
     if(g3.available()) {
       data = g3.read();
