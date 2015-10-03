@@ -6,7 +6,6 @@
 
 // define and undef connected devices
 // DHT is mandatory.
-#undef  MQ9
 #undef  DN7C3CA006
 #define G3
 #undef  ESP8266_DBGMSG
@@ -16,10 +15,6 @@
 // DHT
 #define DHTTYPE DHT22
 #define DHTPIN        13    // DHT pin
-
-// MQ9
-#define MQ9PIN        A1   // MQ9 SIG to Arduino
-#define MQ9_PREHEAT   90   // 90+10 seconds
 
 // DN7C3CA006
 #define SHARPPIN      A0   // Pin 2 VO of dust sensor
@@ -126,9 +121,6 @@ void loop() {
   esp8266.print(F("tmp = "));
   esp8266.println(t);
   delay(150);
-  esp8266.print(F("mq9 = "));
-  esp8266.println(g3);
-  delay(150);
   esp8266.print(F("pm25 = "));
   esp8266.println(dustVal);
 
@@ -179,20 +171,6 @@ float read_dn7c3ca006() {
   digitalWrite(LEDPOWER, HIGH); // turn the LED off
   delayMicroseconds(sleepTime);
   return dust;
-}
-#endif
-
-#ifdef MQ9
-float readMQ9() {
-  int x;
-  float sensor_volt; 
-  float sensorValue;
-  sensorValue = 0;
-  for(x = 0 ; x < 100 ; x++) {
-    sensorValue += analogRead(MQ9PIN);
-  }
-  sensorValue = sensorValue/x;
-  return sensorValue;
 }
 #endif
 
