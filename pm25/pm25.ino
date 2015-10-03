@@ -15,7 +15,7 @@
 // define pins
 // DHT
 #define DHTTYPE DHT22
-#define DHTPIN        2    // DHT pin
+#define DHTPIN        13    // DHT pin
 
 // MQ9
 #define MQ9PIN        A1   // MQ9 SIG to Arduino
@@ -29,9 +29,9 @@
 #define sleepTime     9500
 
 // ESP8266
-#define NODEMCU_RESET 13   // Power-on reset NodeMCU
+#define NODEMCU_RESET 11   // Power-on reset NodeMCU
 #define SSID_RESET    12   // Pull low to reset SSID / PassKey
-SoftwareSerial esp8266(10, 11); // RX, TX
+SoftwareSerial esp8266(2, 3); // RX, TX
 
 // G3
 SoftwareSerial g3(8, 9); // RX, TX
