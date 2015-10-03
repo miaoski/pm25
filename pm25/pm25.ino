@@ -6,18 +6,18 @@
 #include <LiquidCrystal.h>
 
 #define DHTTYPE DHT11
-#define DHTPIN 2        // DHT pin to D3
+#define DHTPIN 2        // DHT pin to D2
 #define SHARPPIN A0     // Pin 2 VO of dust sensor to Arduino A0
 #define MQ9PIN   A1     // MQ9 SIG to Arduino A1
-#define LEDPOWER 3      // Pin 4 LED VCC of dest sensor to Arduino D2
+#define LEDPOWER 3      // Pin 4 LED VCC of dest sensor to Arduino D3
 #define NODEMCU_RESET 9	// To NodeMCU reset pin to D9
 #define APMODE_PIN 8	// Delete stored password in NodeMCU, GND pin D8
 #define SSID_RESET 12	// Pull low to reset SSID / PassKey
 #define MQ9_PREHEAT  90 // 90+10 seconds
 
-#define samplingTime 280
+#define samplingTime 460
 #define deltaTime    40
-#define sleepTime    9680
+#define sleepTime    9500
 
 #undef  ESP8266_DBGMSG
 
@@ -56,7 +56,9 @@ void setup() {
   }
 
   // TODO: Calibrate Vs of DN7C3CA006
-  vs = 240.0;
+  vs = calibrate_DN7C();
+  Serial.print(F("Calibrated vs = "));
+  Serial.println(vs);
   
   // Reset NodeMCU
   /*
@@ -85,12 +87,12 @@ void loop() {
   }
 
   v0 = 0;
-  for(i = 0; i < 250; i++) {
+  for(i = 0; i < 25; i++) {
     v0 = v0 + read_dn7c3ca006();
   }
   v0 = v0 / i;
-  // Serial.print("v0 = ");
-  // Serial.println(v0);
+  Serial.print("v0 = ");
+  Serial.println(v0);
 
   if(h < 50) {
     dn7c_h = 1;
@@ -166,3 +168,15 @@ float read_dn7c3ca006() {
   delayMicroseconds(sleepTime);
   return dust;
 }
+
+float calibrate_DN7C() {
+  float v0 = 0;
+  unsigned short i;
+  for(i = 0; i < 100; i++) {
+    v0 = v0 + read_dn7c3ca006();
+    delay(100);
+  }
+  v0 = v0 / i;
+  return v0;
+}
+
