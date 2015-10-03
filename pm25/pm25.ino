@@ -89,6 +89,7 @@ void loop() {
   v0 = 0;
   for(i = 0; i < 25; i++) {
     v0 = v0 + read_dn7c3ca006();
+    delay(10);
   }
   v0 = v0 / i;
   Serial.print("v0 = ");
@@ -174,7 +175,7 @@ float calibrate_DN7C() {
   unsigned short i;
   for(i = 0; i < 100; i++) {
     v0 = v0 + read_dn7c3ca006();
-    delay(100);
+    delay(10);
   }
   v0 = v0 / i;
   return v0;
