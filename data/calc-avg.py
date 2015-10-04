@@ -27,8 +27,9 @@ for t in ts:
          (t - thirty).strftime(time_format),
          uuid))
     rows = cur.fetchall()
-    if len(rows) == 0:
-        print ','.join((uuid, t.strftime(time_format), tainan[t], "-1"))
-    else:
-        for row in rows:
-            print ','.join((uuid, t.strftime(time_format), tainan[t], str(row[0])))
+    for row in rows:
+        if row[0] is None:
+            val = "-1"
+        else:
+            val = str(row[0])
+        print ','.join((uuid, t.strftime(time_format), tainan[t], val))
