@@ -22,7 +22,7 @@ uuid = '54dc1e06-61ac-489f-a77f-0c3cd38a10d1'
 ts = tainan.keys()
 ts.sort()
 for t in ts:
-    cur.execute('select avg(dn7val) from log where timestamp < ? and timestamp >= ? and id=?',
+    cur.execute('select avg(dn7val) from log where timestamp < ? and timestamp >= ? and id=? and dn7val >= 0',
         ((t + thirty).strftime(time_format),
          (t - thirty).strftime(time_format),
          uuid))
