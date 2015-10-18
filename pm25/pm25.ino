@@ -1,7 +1,7 @@
 // PM 2.5 Project
 // https://github.com/miaoski/pm25
 //
-#include "DHT.h"
+#include <DHT.h>
 #include <SoftwareSerial.h>
 
 // define and undef connected devices
@@ -112,7 +112,7 @@ void loop() {
   Serial.print(F("G3 = "));
   Serial.print(g3);
   Serial.print(F(" mg/m3"));
-  esp8266.print(F("pm25 = "));
+  esp8266.print(F("mq9 = "));
   esp8266.println(g3);
   delay(150);
 #endif
@@ -124,12 +124,15 @@ void loop() {
   esp8266.print(F("tmp = "));
   esp8266.println(t);
   delay(150);
-// #ifdef G3
-// #endif
-// #ifdef DN7C3CA006
+#ifdef G3
+  esp8266.print(F("pm25 = "));
+  esp8266.println(g3);
+  delay(150);
+#endif
+#ifdef DN7C3CA006
 //   esp8266.print(F("pm25 = "));
 //   esp8266.println(dustVal);
-// #endif
+#endif
 
 #ifdef ESP8266_DBGMSG
   while(esp8266.available()) {
