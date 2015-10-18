@@ -112,6 +112,9 @@ void loop() {
   Serial.print(F("G3 = "));
   Serial.print(g3);
   Serial.print(F(" mg/m3"));
+  esp8266.print(F("pm25 = "));
+  esp8266.println(g3);
+  delay(150);
 #endif
   Serial.println("");
   
@@ -121,8 +124,12 @@ void loop() {
   esp8266.print(F("tmp = "));
   esp8266.println(t);
   delay(150);
-  esp8266.print(F("pm25 = "));
-  esp8266.println(dustVal);
+// #ifdef G3
+// #endif
+// #ifdef DN7C3CA006
+//   esp8266.print(F("pm25 = "));
+//   esp8266.println(dustVal);
+// #endif
 
 #ifdef ESP8266_DBGMSG
   while(esp8266.available()) {
@@ -143,6 +150,7 @@ float readDN7C3CA006(float humidity) {
   v0 = 0;
   for(i = 0; i < 50; i++) {
     v0 = v0 + read_dn7c3ca006();
+    delay(10);
   }
   v0 = v0 / i;
   Serial.print(F("v0 = "));
