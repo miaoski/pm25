@@ -1,7 +1,7 @@
 // PM 2.5 Project
 // https://github.com/miaoski/pm25
 //
-#include <DHT.h>
+#include "DHT.h"
 #include <SoftwareSerial.h>
 
 // define and undef connected devices
