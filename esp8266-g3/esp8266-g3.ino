@@ -4,6 +4,9 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
+#include "DHT.h"
+#define DHTPIN 2
+#define DHTTYPE DHT22
 
 #define SSID        "SSID"
 #define PASSWORD    "PASSWORD"
@@ -11,8 +14,11 @@
 #define HOST_PORT   443
 #define UUID        "00000000-0000-0000-0000-000000000000"
 
+DHT dht(DHTPIN, DHTTYPE);
+
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);
+  dht.begin();
   Serial.begin(9600);     // Remember to AT+UART=9600,8,1,0,0
   WiFi.begin(SSID, PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
@@ -26,14 +32,20 @@ void loop() {
   WiFiClientSecure client;
   char str[256];
   int g3 = 0;
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+  char t_s[6];
+  char h_s[6];
 
+  dtostrf(t, 0, 0, t_s);
+  dtostrf(h, 0, 0, h_s);
   g3 = readG3();
   Serial.print("g3 = ");
   Serial.print(g3);
   Serial.println();
   snprintf(str, sizeof(str),
-    "GET /id/%s/hum/1/tmp/1/mq9/0/dn7/%d HTTP/1.0\r\n\r\n",
-    UUID, g3);
+    "GET /id/%s/hum/%s/tmp/%s/mq9/0/dn7/%d HTTP/1.0\r\n\r\n",
+    UUID, h_s, t_s, g3);
   if(client.connect(HOST_NAME, HOST_PORT)) {
     client.print(str);
     Serial.print(str);
